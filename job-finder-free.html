@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Job Finder — Free Version</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ebe3;
+    --card: #1c1f2e;
+    --card2: #151726;
+    --border: rgba(255,255,255,0.08);
+    --accent: #63b3ed;
+    --gold: #f6ad55;
+    --green: #68d391;
+    --text: #e2e8f0;
+    --muted: #718096;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(28,26,23,0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .badge-wrap { display: flex; justify-content: center; margin-bottom: 32px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 100px; padding: 12px 40px;
+    font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500;
+  }
+  .badge-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+  /* FREE badge pill */
+  .free-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(246,173,85,0.15); border: 1px solid rgba(246,173,85,0.35);
+    border-radius: 100px; padding: 5px 14px; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+    font-weight: 600; margin-bottom: 16px;
+  }
+
+  .header { margin-bottom: 48px; text-align: center; }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 900; line-height: 1.1;
+    letter-spacing: -0.02em; margin-bottom: 16px; color: var(--card2);
+  }
+  .header h1 .line2 {
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: block;
+  }
+  .header p { color: #5a5650; font-size: 17px; line-height: 1.6; max-width: 560px; font-weight: 300; margin: 0 auto; }
+
+  /* Upgrade nudge banner */
+  .upgrade-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: linear-gradient(135deg, rgba(99,179,237,0.08), rgba(246,173,85,0.08));
+    border: 1px solid rgba(246,173,85,0.25); border-radius: 12px;
+    padding: 14px 20px; margin-bottom: 32px; text-align: left;
+  }
+  .upgrade-banner-left { display: flex; align-items: center; gap: 10px; }
+  .upgrade-icon {
+    width: 34px; height: 34px; background: rgba(246,173,85,0.12);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    color: var(--gold); flex-shrink: 0;
+  }
+  .upgrade-text { font-size: 13px; color: #8a7a68; line-height: 1.5; }
+  .upgrade-text strong { color: var(--card2); font-weight: 600; display: block; font-size: 13.5px; }
+  .upgrade-link {
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    background: linear-gradient(135deg, #2b6cb0, #3182ce);
+    color: white; font-size: 12px; font-weight: 500; padding: 8px 16px;
+    border-radius: 8px; text-decoration: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(49,130,206,0.3);
+  }
+
+  .gradient-bridge { height: 60px; background: linear-gradient(180deg, var(--bg) 0%, #3d3f52 100%); border-radius: 20px 20px 0 0; }
+  .stats-wrap {
+    background: linear-gradient(180deg, #3d3f52 0%, #2a2d40 40%, #1e2133 70%, #1c1f2e 100%);
+    padding: 28px 40px 36px;
+  }
+  .stats { display: flex; justify-content: center; align-items: center; }
+  .stat { display: flex; flex-direction: column; gap: 4px; flex: 1; align-items: center; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: #d4b896; }
+  .stat-label { font-size: 12px; color: #8a7a68; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .stat-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.15); }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 0 0 20px 20px; padding: 40px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(28,26,23,0.22);
+    text-align: left;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--gold), transparent); opacity: 0.6;
+  }
+  .form-grid { display: grid; gap: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field > label {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #a8c4e0; font-weight: 600; display: flex; align-items: center; gap: 6px;
+  }
+  .req { color: var(--gold); font-size: 14px; }
+
+  .input-wrap { position: relative; }
+  .input-wrap .icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--muted); pointer-events: none; transition: color 0.2s;
+  }
+  input[type="text"], input[type="email"], select {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09); border-radius: 12px;
+    padding: 14px 16px 14px 46px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--text); outline: none; transition: all 0.2s;
+    -webkit-appearance: none; appearance: none;
+  }
+  input[type="text"]::placeholder, input[type="email"]::placeholder { color: rgba(113,128,150,0.6); }
+  input[type="text"]:focus, input[type="email"]:focus, select:focus {
+    border-color: rgba(99,179,237,0.4); background: rgba(99,179,237,0.06);
+    box-shadow: 0 0 0 3px rgba(99,179,237,0.08);
+  }
+  .input-wrap:focus-within .icon { color: var(--accent); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .submit-btn {
+    width: 100%; background: linear-gradient(135deg, #2b6cb0, #3182ce);
+    border: none; border-radius: 12px; padding: 16px 24px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 10px; transition: all 0.25s; box-shadow: 0 4px 20px rgba(49,130,206,0.35);
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(49,130,206,0.45); }
+  .spinner {
+    display: none; width: 17px; height: 17px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .features {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin: 12px -40px -40px; padding: 32px 40px 36px;
+    border-radius: 0 0 20px 20px;
+    background: linear-gradient(180deg, #2a2d3e 0%, #13141f 100%);
+    border-top: 1px solid rgba(212,184,150,0.1);
+  }
+  .feature { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #c8b89a; font-weight: 500; }
+  .feature-dot { width: 5px; height: 5px; border-radius: 50%; background: #a89070; }
+  .success {
+    display: none; flex-direction: column; align-items: center;
+    text-align: center; padding: 40px 20px; gap: 16px;
+  }
+  .success-ring {
+    width: 72px; height: 72px; background: rgba(104,211,145,0.12);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--green);
+  }
+  .success h3 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); }
+  .success p { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 300px; }
+  .success-tag {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(104,211,145,0.08); border: 1px solid rgba(104,211,145,0.2);
+    border-radius: 100px; padding: 6px 16px; font-size: 12.5px; color: var(--green); font-weight: 500;
+  }
+
+  /* Pro upsell inside success state */
+  .success-upsell {
+    margin-top: 8px; padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(99,179,237,0.07), rgba(246,173,85,0.07));
+    border: 1px solid rgba(246,173,85,0.2); border-radius: 12px;
+    max-width: 320px; text-align: center;
+  }
+  .success-upsell p { font-size: 13px; color: #a89070; margin-bottom: 10px; line-height: 1.5; }
+  .success-upsell a {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #744210, #c05621);
+    color: #feebc8; font-size: 13px; font-weight: 500; padding: 9px 18px;
+    border-radius: 8px; text-decoration: none;
+  }
+
+  .footer { margin-top: 24px; text-align: center; font-size: 12px; color: #8c8579; font-weight: 300; }
+  @media (max-width: 520px) {
+    .card { padding: 24px; }
+    .two-col { grid-template-columns: 1fr; }
+    .upgrade-banner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="badge-wrap">
+    <div class="badge"><span class="badge-dot"></span>AI-Powered Job Search Agent</div>
+  </div>
+
+  <div class="header">
+    <div class="free-pill">✦ Free Version</div>
+    <h1><span>Find Your Next</span><br><span class="line2">Dream Career.</span></h1>
+    <p>Enter your details and let our AI agent match you with the most relevant opportunities — scored, ranked, and ready to apply.</p>
+  </div>
+
+  <!-- Upgrade nudge -->
+  <div class="upgrade-banner">
+    <div class="upgrade-banner-left">
+      <div class="upgrade-icon">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+        </svg>
+      </div>
+      <div class="upgrade-text">
+        <strong>Want deeper, personalized results?</strong>
+        Upload your resume in Pro for AI-powered match scoring &amp; auto cover letters.
+      </div>
+    </div>
+    <a href="#" class="upgrade-link">
+      Try Pro
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="gradient-bridge"></div>
+
+  <div class="stats-wrap">
+    <div class="stats">
+      <div class="stat"><span class="stat-value">All</span><span class="stat-label">Jobs Found</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-value">AI</span><span class="stat-label">Match Score</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-value">Auto</span><span class="stat-label">Cover Letter</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <form id="jobForm" class="form-grid" onsubmit="handleSubmit(event)">
+
+      <!-- NAME + EMAIL -->
+      <div class="two-col">
+        <div class="field">
+          <label>Name <span class="req">*</span></label>
+          <div class="input-wrap">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+            <input type="text" id="fullName" placeholder="e.g. John Smith" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>Email Address <span class="req">*</span></label>
+          <div class="input-wrap">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+            </svg>
+            <input type="email" id="emailAddr" placeholder="e.g. john@email.com" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOB TITLE -->
+      <div class="field">
+        <label>Job Title / Role <span class="req">*</span></label>
+        <div class="input-wrap">
+          <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/>
+          </svg>
+          <input type="text" id="jobTitle" placeholder="e.g. Software Engineer, Product Manager…" required>
+        </div>
+      </div>
+
+      <!-- COUNTRY + CITY -->
+      <div class="two-col">
+        <div class="field">
+          <label>Country</label>
+          <div class="input-wrap">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"/>
+            </svg>
+            <input type="text" id="country" value="United States" readonly style="opacity:0.7;cursor:default;">
+          </div>
+        </div>
+        <div class="field">
+          <label>City / Location <span class="req">*</span></label>
+          <div class="input-wrap">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+            </svg>
+            <input type="text" id="location" placeholder="e.g. Los Angeles, New York…" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Search Jobs with AI</span>
+        <svg id="btnArrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+        </svg>
+      </button>
+
+      <div class="features">
+        <div class="feature"><span class="feature-dot"></span>AI match scoring</div>
+        <div class="feature"><span class="feature-dot"></span>Auto cover letter</div>
+        <div class="feature"><span class="feature-dot"></span>Auto Email Notification</div>
+        <div class="feature"><span class="feature-dot"></span>Results in 1–3 min</div>
+      </div>
+
+    </form>
+
+    <div class="success" id="successState">
+      <div class="success-ring">
+        <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="success-tag">
+        <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;"></span>
+        Agent is running
+      </div>
+      <h3>Search Submitted!</h3>
+      <p id="successMsg">Your AI agent is scanning listings and scoring matches. Results will be emailed to you in 1–3 minutes.</p>
+
+      <!-- Upsell to Pro -->
+      <div class="success-upsell">
+        <p>✦ Want personalized matches &amp; an auto-generated cover letter? Upload your resume in the <strong>Pro version</strong>.</p>
+        <a href="#">
+          Upgrade to Pro
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Your search is processed securely. Results typically arrive in 1–3 minutes.</div>
+</div>
+
+<script>
+  // ⬇️ Replace this with your FREE workflow webhook URL
+  const WORKFLOW_URL = "https://YOUR_N8N_INSTANCE/webhook/FREE-WORKFLOW-ID";
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const btnArrow = document.getElementById('btnArrow');
+
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.8';
+    spinner.style.display = 'block';
+    btnText.textContent = 'Launching AI Agent…';
+    btnArrow.style.display = 'none';
+
+    const payload = {
+      Full_Name: document.getElementById('fullName').value,
+      Email:     document.getElementById('emailAddr').value,
+      Title:     document.getElementById('jobTitle').value,
+      Country:   document.getElementById('country').value,
+      Location:  document.getElementById('location').value
+    };
+
+    try {
+      await fetch(WORKFLOW_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) { console.warn(err); }
+
+    const name  = payload.Full_Name.split(' ')[0];
+    const email = payload.Email;
+    document.getElementById('successMsg').textContent =
+      'Hi ' + name + '! Your AI agent is now scanning listings and scoring matches. Results will be sent to ' + email + ' in 1–3 minutes.';
+    document.getElementById('jobForm').style.display = 'none';
+    document.getElementById('successState').style.display = 'flex';
+  }
+</script>
+</body>
+</html>
