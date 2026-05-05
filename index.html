@@ -385,7 +385,7 @@
 
     const payload = {
       Full_Name: document.getElementById('fullName').value,
-      Email:     document.getElementById('emailAddr').value,
+      Email:     document.getElementById('emailAddr').value.trim(),
       Title:     document.getElementById('jobTitle').value,
       Country:   document.getElementById('country').value,
       Location:  document.getElementById('location').value
